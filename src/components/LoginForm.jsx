@@ -1,25 +1,72 @@
-import { doSocialLogin } from "../app/actions";
+"use client";
 
-export default function LoginForm() {
+import SocialLogin from "./SocialLogin";
+
+import { doCredentialLogin } from "@/app/actions";
+
+import { useRouter } from "next/navigation";
+
+import { useState } from "react";
+
+const LoginForm = () => {
+  const router = useRouter();
+  const [error, setError] = useState();
+
+  async function handleFormSubmit(event) {
+    event.preventDefault();
+
+    try {
+      const formData = new FormData(event.currentTarget);
+
+      const response = await doCredentialLogin(formData);
+
+      if (!!response.error) {
+        console.error(response.error);
+        setError(response.error.message);
+      } else {
+        router.push("/home");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Check your Credentials");
+    }
+  }
+
   return (
-    <form>
-      <button
-        className="bg-gray-400 text-gray-700 p-1 rounded-md m-1 text-lg"
-        type="submit"
-        name="action"
-        value="google"
+    <>
+      <div className="text-xl text-red-500">{error}</div>
+      <form
+        className="my-5 flex flex-col items-center border p-3 border-gray-200 rounded-md"
+        onSubmit={handleFormSubmit}
       >
-        Sign In with google
-      </button>
-
-      <button
-        className="bg-black text-white p-1 rounded-md m-1 text-lg"
-        type="submit"
-        name="action"
-        value="github"
-      >
-        Sign in with gitHub
-      </button>
-    </form>
+        <div className="my-2">
+          <label htmlFor="email">Email Address</label>
+          <input
+            className="border mx-2 border-gray-500 rounded"
+            type="email"
+            name="email"
+            id="email"
+          />
+        </div>
+        <div className="my-2">
+          <label htmlFor="password">Password</label>
+          <input
+            className="border mx-2 border-gray-500 rounded"
+            type="password"
+            name="password"
+            id="password"
+          />
+        </div>
+        <button
+          type="submit"
+          className="bg-orange-300 mt-4 rounded flex justify-center items-center w-36"
+        >
+          Credential Login
+        </button>
+      </form>
+      <SocialLogin />{" "}
+    </>
   );
-}
+};
+
+export default LoginForm;
